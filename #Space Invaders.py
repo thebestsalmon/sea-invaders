@@ -4,11 +4,15 @@ import os
 import math
 import random
 
-
 # Screen
 wn = turtle.Screen()
 wn.bgcolor("black")
 wn.title("Space Invaders")
+
+# Shapes
+turtle.register_shape("enemy.gif")
+
+
 
 # border
 border_pen = turtle.Turtle()
@@ -22,6 +26,18 @@ for side in range(4):
         border_pen.fd(600)
         border_pen.lt(90)
 border_pen.hideturtle()
+
+# Score
+score = 0
+
+score_pen = turtle.Turtle()
+score_pen.speed(0)
+score_pen.color("white")
+score_pen.penup()
+score_pen.setposition(-290, 280)
+scorerestring = "Score: %s" %score
+score_pen.write(scorerestring, False, align="left", font=("Arial", 14, "normal"))
+score_pen.hideturtle()
 
 # player
 player = turtle.Turtle()
@@ -47,8 +63,7 @@ for i in range(number_of_enemies):
 
 
 for enemy in enemies:
-    enemy.color("yellow")
-    enemy.shape("circle")
+    enemy.shape("enemy.gif")
     enemy.penup()
     enemy.speed(0)
     x = random.randint(-200, 200)
@@ -124,17 +139,22 @@ while True:
 
         # enemy back
         if enemy.xcor() > 280:
-            y = enemy.ycor()
-            y -= 40
+            # Move enemies down
+            for e in enemies:
+                y = e.ycor()
+                y -= 40
+                e.sety(y)
+            # Change direction
             enemyspeed *= -1
-            enemy.sety(y)
-
 
         if enemy.xcor() < -280:
-            y = enemy.ycor()
-            y -= 40
+            # Move enemies down
+            for e in enemies:
+                y = e.ycor()
+                y -= 40
+                e.sety(y)
+            # Change direction
             enemyspeed *= -1
-            enemy.sety(y)
 
             # Collision
         if isCollision(bullet, enemy):
@@ -146,6 +166,11 @@ while True:
             x = random.randint(-200, 200)
             y = random.randint(100, 250)
             enemy.setposition(x, y)
+            # Update score
+            score += 10
+            scorerestring = "Score: %s" %score
+            score_pen.clear()
+            score_pen.write(scorerestring, False, align="left", font=("Arial", 14, "normal"))
 
         if isCollision(player, enemy):
             player.hideturtle()
