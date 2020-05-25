@@ -1,18 +1,22 @@
-# Space Invaders
+# Sea Invaders
 import turtle
-import os
 import math
-import random
+import winsound
+
+
 
 # Screen
 wn = turtle.Screen()
 wn.bgcolor("black")
-wn.title("Space Invaders")
+wn.title("Sea Invaders")
+wn.bgpic("bg.gif")
+wn.tracer(0)
+
 
 # Shapes
-turtle.register_shape("enemy.gif")
-
-
+wn.register_shape("enemy.gif")
+wn.register_shape("player.gif")
+wn.register_shape("bubble.gif")
 
 # border
 border_pen = turtle.Turtle()
@@ -32,27 +36,25 @@ score = 0
 
 score_pen = turtle.Turtle()
 score_pen.speed(0)
-score_pen.color("white")
+score_pen.color("black")
 score_pen.penup()
 score_pen.setposition(-290, 280)
-scorerestring = "Score: %s" %score
+scorerestring = "Score: {}".format(score)
 score_pen.write(scorerestring, False, align="left", font=("Arial", 14, "normal"))
 score_pen.hideturtle()
 
 # player
 player = turtle.Turtle()
-player.color("pink")
-player.shape("triangle")
+player.shape("player.gif")
 player.penup()
 player.speed(0)
 player.setposition(0, -250)
 player.setheading(90)
-
-playerspeed = 15
+player.speed = 0
 
 # Enemy
 # enemy number
-number_of_enemies = 5
+number_of_enemies = 30
 # enemy list
 enemies = []
 
@@ -61,45 +63,56 @@ for i in range(number_of_enemies):
     # Create
     enemies.append(turtle.Turtle())
 
+enemy_start_x = -225
+enemy_start_y = 250
+enemy_number = 0
+
 
 for enemy in enemies:
     enemy.shape("enemy.gif")
     enemy.penup()
     enemy.speed(0)
-    x = random.randint(-200, 200)
-    y = random.randint(100, 250)
+    x = enemy_start_x + (50*enemy_number)
+    y = enemy_start_y
     enemy.setposition(x, y)
+    # update number
+    enemy_number += 1
+    if enemy_number == 10:
+        enemy_start_y -= 50
+        enemy_number = 0
 
 
-enemyspeed = 2
+enemyspeed = 0.1
 
 
 # player's bullet
 bullet = turtle.Turtle()
-bullet.color("red")
-bullet.shape("triangle")
+bullet.shape("bubble.gif")
 bullet.penup()
 bullet.speed(0)
 bullet.setheading(90)
 bullet.shapesize(0.5, 0.5)
 bullet.hideturtle()
 
-bulletspeed = 20
+bulletspeed = 3
 
 # bullet state
 bulletstate = "ready"
 
 # player movement
 def move_left():
-    x = player.xcor()
-    x -= playerspeed
-    if x < -280:
-        x = - 280
-    player.setx(x)
+    player.speed = -2
+
 
 def move_right():
+    player.speed = 2
+
+
+def move_player():
     x = player.xcor()
-    x += playerspeed
+    x += player.speed
+    if x < -280:
+        x = - 280
     if x > 280:
         x = 280
     player.setx(x)
@@ -107,6 +120,8 @@ def move_right():
 def fire_bullet():
     global bulletstate
     if bulletstate == "ready":
+        fname = "bubbleeffect.wav"
+        winsound.PlaySound(fname, winsound.SND_FILENAME)
         bulletstate = "fire"
         # move bullet to the above player
         x = player.xcor()
@@ -123,13 +138,16 @@ def isCollision(t1, t2):
 
 
 # key bindings
-turtle.listen()
-turtle.onkey(move_left, "Left")
-turtle.onkey(move_right, "Right")
-turtle.onkey(fire_bullet, "space")
+wn.listen()
+wn.onkey(move_left, "Left")
+wn.onkeypress(move_right, "Right")
+wn.onkeypress(fire_bullet, "space")
 
 # loop
 while True:
+
+    wn.update()
+    move_player()
 
     for enemy in enemies:
         # enemy move
@@ -158,14 +176,15 @@ while True:
 
             # Collision
         if isCollision(bullet, enemy):
+            hname = "hiteffect.wav"
+            winsound.PlaySound(hname, winsound.SND_FILENAME)
             # Reset the bullet
             bullet.hideturtle()
             bulletstate = "ready"
             bullet.setposition(0, -400)
             # Reset the enemy
-            x = random.randint(-200, 200)
-            y = random.randint(100, 250)
-            enemy.setposition(x, y)
+            enemy.setposition(0, 10000)
+
             # Update score
             score += 10
             scorerestring = "Score: %s" %score
@@ -174,7 +193,16 @@ while True:
 
         if isCollision(player, enemy):
             player.hideturtle()
-            enemy.hideturtle()
+            for enemy in enemies:
+                enemy.hideturtle()
+            GO = turtle.Turtle()
+            GO.speed(0)
+            GO.color("red")
+            GO.penup()
+            GO.setposition(-70, 0)
+            GO.hideturtle()
+            GOrestring = "Game Over"
+            GO.write(GOrestring, False, align="left", font=("Arial", 20, "normal"))
             print("Game Over")
             break
 
@@ -190,13 +218,3 @@ while True:
         bulletstate = "ready"
 
 
-
-
-
-
-
-
-
-
-
-delay = input("Press enter")
