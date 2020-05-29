@@ -183,7 +183,7 @@ while True:
             bulletstate = "ready"
             bullet.setposition(0, -400)
             # Reset the enemy
-            enemy.setposition(0, 10000)
+            
 
             # Update score
             score += 10
